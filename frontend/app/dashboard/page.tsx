@@ -1,44 +1,66 @@
 "use client"
-import {useEffect, useState} from "react"
 
-type KPI = {
-  total_uploaded: number
-  total_published: number
-  total_created: number
-  published_rate: number
+import {useEffect,useState} from "react"
+
+import KPIGrid from "../components/KPIGrid"
+import TrendChart from "../components/TrendChart"
+import PlatformPie from "../components/PlatformPie"
+import ChannelBar from "../components/ChannelBar"
+import AlertsSlider from "../components/AlertSlider"
+
+import {
+fetchKPIs,
+fetchMonthlyTrend,
+fetchPlatforms,
+fetchChannels,
+fetchAlerts
+} from "@/services/api"
+
+export default function Dashboard(){
+
+const [kpis,setKpis]=useState({})
+const [trend,setTrend]=useState([])
+const [platform,setPlatform]=useState([])
+const [channels,setChannels]=useState([])
+const [alerts,setAlerts]=useState([])
+
+const handlePlatformClick=async(platform:string)=>{
+
+const res=await fetchChannels(platform)
+
+setChannels(res.data)
+
 }
 
-export default function Dashboard()
-{
-    const [kpis, setKpis] = useState<KPI | null>(null)
+useEffect(()=>{
 
-    useEffect(() => {
-        fetch("http://127.0.0.1:8000/kpis")
-        .then(res => res.json())
-        .then(data=>setKpis(data))
-    }, [])
+fetchKPIs().then(r=>setKpis(r.data))
+fetchMonthlyTrend().then(r=>setTrend(r.data))
+fetchPlatforms().then(r=>setPlatform(r.data))
+fetchAlerts().then(r=>setAlerts(r.data))
 
-    return(
-        <div className="">
-            <h1>Dashboard</h1>
-            <div className="flex flex-row justify-around p-3 bg-slate-900 " >
-                 <div className="bg-slate-800 text-white p-6 rounded-xl shadow-md" >
-                    <p className="text-gray-400 text-sm" >Uploaded</p>
-                    <h2 className="text-3xl font-bold mt-2" >{kpis ? kpis.total_uploaded: 'Loading..'}</h2>
-                 </div>
-                 <div className="bg-slate-800 text-white p-6 rounded-xl shadow-md" >
-                    <p className="text-gray-400 text-sm" >Created</p>
-                    <h2 className="text-3xl font-bold mt-2" >{kpis ? kpis.total_created: 'Loading..'}</h2>
-                 </div>
-                 <div className="bg-slate-800 text-white p-6 rounded-xl shadow-md" >
-                    <p className="text-gray-400 text-sm" >Published</p>
-                    <h2 className="text-3xl font-bold mt-2" >{kpis ? kpis.total_published: 'Loading..'}</h2>
-                 </div>
-                 <div className="bg-slate-800 text-white p-6 rounded-xl shadow-md" >
-                    <p className="text-gray-400 text-sm" >Published Rate</p>
-                    <h2 className="text-3xl font-bold mt-2" >{kpis ? kpis.published_rate: 'Loading..'}</h2>
-                 </div>
-            </div>
-        </div>
-    )
+},[])
+
+return(
+
+<div className="p-8 space-y-8 bg-[#020617] min-h-screen">
+
+<AlertsSlider alerts={alerts}/>
+
+<KPIGrid data={kpis}/>
+
+<TrendChart data={trend}/>
+
+<div className="grid grid-cols-2 gap-6">
+
+<PlatformPie data={platform} onSelect={handlePlatformClick}/>
+
+<ChannelBar data={channels}/>
+
+</div>
+
+</div>
+
+)
+
 }
