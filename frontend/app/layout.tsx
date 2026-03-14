@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <Navbar />
 
-        <main className="p-6">{children}</main>
+        <main className="">{children}</main>
       </body>
     </html>
   );
