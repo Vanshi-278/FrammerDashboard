@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000"
+  baseURL: "http://127.0.0.1:9000"
 })
 
 export const fetchKPIs = () => API.get("/dashboard/kpi")

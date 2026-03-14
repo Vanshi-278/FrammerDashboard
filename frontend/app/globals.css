@@ -38,3 +38,7 @@ cursor:pointer;
 background:#6366f1;
 color:white;
 }
+
+html {
+  scroll-behavior: smooth;
+}

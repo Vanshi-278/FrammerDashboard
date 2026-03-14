@@ -22,3 +22,8 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+venv/
+backend/venv
+__pycache__/
+*.pyc
