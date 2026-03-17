@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:9000"
+  baseURL: "http://127.0.0.1:8000"
 })
 
 export const fetchKPIs = () => API.get("/dashboard/kpi")
@@ -16,3 +16,6 @@ export const fetchChannels = (platform:string) =>
 export const fetchAlerts = () => API.get("/dashboard/alerts")
 
 export const fetchMonthDuration = () => API.get("/dashboard/monthly-duration-trend")
+
+export const fetchVideoDetails = (params: Record<string, any>) =>
+  API.get("/dashboard/video-details", { params })

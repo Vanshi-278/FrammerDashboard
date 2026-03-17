@@ -314,3 +314,104 @@ def alerts():
     alerts_list.append("Spike detected in uploads this month")
 
     return alerts_list
+
+def get_video_details(search=None, published=None, team_name=None, type_filter=None, uploaded_by=None, published_platform=None, limit=50, offset=0):
+    df = video_df.copy()
+    
+    # Apply filters
+    if search:
+        df = df[df['Headline'].str.contains(search, case=False, na=False) | 
+                df['Video ID'].astype(str).str.contains(search, na=False)]
+    
+    if published is not None and published != '':
+        # Handle both string and boolean values
+        target_value = 'yes' if isinstance(published, bool) and published else 'no' if isinstance(published, bool) else published
+        df = df[df['Published'].str.lower() == target_value.lower()]
+    
+    if team_name:
+        df = df[df['Team Name'].str.contains(team_name, case=False, na=False)]
+    
+    if type_filter:
+        df = df[df['Type'].str.contains(type_filter, case=False, na=False)]
+    
+    if uploaded_by:
+        df = df[df['Uploaded By'].str.contains(uploaded_by, case=False, na=False)]
+    
+    if published_platform:
+        df = df[df['Published Platform'].str.contains(published_platform, case=False, na=False)]
+    
+    # Pagination
+    total = len(df)
+    df = df.iloc[offset:offset + limit]
+    
+    # Replace NaN with None for JSON serialization
+    df = df.fillna('')
+    
+    # Convert to list of dicts
+    result = df.to_dict('records')
+    
+    return {
+        "data": result,
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+def _missing_stats(series: pd.Series):
+    """Return count and percentage of missing/blank values in a series."""
+    total = len(series)
+    if total == 0:
+        return {"missing": 0, "missing_pct": 0.0, "complete_pct": 100.0}
+
+    # Treat NaN and empty/whitespace-only strings as missing
+    missing_mask = series.isna() | series.astype(str).str.strip().eq("")
+    missing = int(missing_mask.sum())
+    missing_pct = round((missing / total) * 100, 2)
+    complete_pct = round(100.0 - missing_pct, 2)
+
+    return {"missing": missing, "missing_pct": missing_pct, "complete_pct": complete_pct}
+
+
+def get_data_quality():
+    """Return data quality stats for key fields in the video details dataset."""
+    total = len(video_df)
+
+    fields = [
+        "Published",
+        "Uploaded By",
+        "Published Platform",
+        "Source",
+        "Headline",
+        "Video ID",
+    ]
+
+    field_stats = []
+    for field in fields:
+        if field in video_df.columns:
+            stats = _missing_stats(video_df[field])
+            field_stats.append({
+                "field": field,
+                "total": total,
+                **stats,
+            })
+
+    return {
+        "total_records": total,
+        "fields": field_stats,
+    }
+
+
+def get_filter_options():
+    """Return distinct values for all filter fields"""
+    team_names = sorted(video_df['Team Name'].dropna().unique().tolist())
+    types = sorted(video_df['Type'].dropna().unique().tolist())
+    uploaded_by = sorted(video_df['Uploaded By'].dropna().unique().tolist())
+    published_platforms = sorted(video_df['Published Platform'].dropna().unique().tolist())
+    published_platforms = [p for p in published_platforms if p]  # Remove empty strings
+    
+    return {
+        "team_names": team_names,
+        "types": types,
+        "uploaded_by": uploaded_by,
+        "published_platforms": published_platforms
+    }
