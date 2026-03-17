@@ -16,3 +16,6 @@ export const fetchChannels = (platform:string) =>
 export const fetchAlerts = () => API.get("/dashboard/alerts")
 
 export const fetchMonthDuration = () => API.get("/dashboard/monthly-duration-trend")
+
+export const fetchVideoDetails = (params: Record<string, any>) =>
+  API.get("/dashboard/video-details", { params })
