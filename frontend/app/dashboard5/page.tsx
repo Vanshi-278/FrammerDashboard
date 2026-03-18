@@ -5,6 +5,7 @@ import DataTable from '../components/DataTable';
 import FilterPanel from '../components/FilterPanel';
 import { usePaginatedData } from '../hooks/usePaginatedData';
 import { exportToCSV } from '../utils/export';
+import { getApiUrl } from '../utils/apiConfig';
 
 interface VideoDetail {
   Headline: string;
@@ -97,9 +98,10 @@ export default function Dashboard5Page() {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
+        const apiUrl = getApiUrl();
         const [optsRes, qualityRes] = await Promise.all([
-          fetch('http://localhost:8000/dashboard/filter-options'),
-          fetch('http://localhost:8000/dashboard/data-quality'),
+          fetch(`${apiUrl}/dashboard/filter-options`),
+          fetch(`${apiUrl}/dashboard/data-quality`),
         ]);
 
         const options = await optsRes.json();

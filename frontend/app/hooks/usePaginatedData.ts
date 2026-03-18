@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getApiUrl } from '../utils/apiConfig';
 
 interface UsePaginatedDataOptions {
   endpoint: string;
@@ -39,7 +40,8 @@ export function usePaginatedData<T>(
       params.append('offset', (page * limit).toString());
 
       try {
-        const url = `http://localhost:8000${endpoint}?${params}`;
+        const apiUrl = getApiUrl();
+        const url = `${apiUrl}${endpoint}?${params}`;
         const response = await fetch(url);
         const result = await response.json();
 
