@@ -56,13 +56,25 @@ def load_channel_user_copy():
     return _read_csv("combined_data(2025-3-1-2026-2-28) by channel and user copy.csv")
 
 
+<<<<<<< HEAD
 def load_input():
     return _read_csv("combined_data(2025-3-1-2026-2-28) by input type.csv")
 
 
 def load_output():
+=======
+def load_input_type():
+    return _read_csv("combined_data(2025-3-1-2026-2-28) by input type.csv")
+
+
+def load_output_type():
+>>>>>>> e24dbbd (added navbar and dashboard 3)
     return _read_csv("combined_data(2025-3-1-2026-2-28) by output type.csv")
 
 
 def load_language():
+<<<<<<< HEAD
     return _read_csv("combined_data(2025-3-1-2026-2-28) by language.csv")
+=======
+    return _read_csv("combined_data(2025-3-1-2026-2-28) by language.csv")
+>>>>>>> e24dbbd (added navbar and dashboard 3)
