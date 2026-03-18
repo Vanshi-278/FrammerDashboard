@@ -6,7 +6,7 @@ import { TrendingUp, TrendingDown } from "lucide-react"
 export default function KPIcard({ title, value }: any) {
 
   const isNumber = typeof value === "number"
-  const numberValue = isNumber ? parseFloat(value) : 0
+  const numberValue = isNumber ? value : 0
   const trend = Math.random() > 0.5 ? "up" : "down" // replace later with backend metric
 
   return (
