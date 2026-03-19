@@ -1,7 +1,7 @@
 /**
  * Get the API base URL based on the environment
  * - On localhost: uses http://localhost:8000
- * - On deployed: uses same domain with port 8000 (e.g., https://example.com:8000)
+ * - On production: uses Vercel backend (https://backendframmerai.vercel.app)
  * - Can be overridden with NEXT_PUBLIC_API_URL environment variable
  */
 export const getApiUrl = (): string => {
@@ -17,9 +17,8 @@ export const getApiUrl = (): string => {
       return 'http://localhost:8000';
     }
 
-    // On production, construct URL from current hostname
-    // e.g., https://example.com:8000
-    return `${window.location.protocol}//${window.location.hostname}:8000`;
+    // On production, use deployed Vercel backend
+    return 'https://backendframmerai.vercel.app';
   }
 
   // Server-side fallback
