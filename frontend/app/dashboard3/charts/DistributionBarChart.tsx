@@ -66,19 +66,27 @@ export default function DistributionBarChart({
             tickLine={{ stroke: "#314158" }}
           />
           <Tooltip
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
-            contentStyle={{
-              backgroundColor: "#111c36",
-              border: "1px solid #2a3b59",
-              borderRadius: "14px",
-              color: "#ffffff",
-            }}
-            labelStyle={{ color: "#cbd5e1", fontWeight: 600 }}
-            formatter={(value: number, _name, props) => [
-              `${value}`,
-              props?.payload?.label || "Value",
-            ]}
-          />
+  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+  content={({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+
+    const item = payload[0]?.payload;
+
+    return (
+      <div
+        style={{
+          backgroundColor: "#111c36",
+          border: "1px solid #2a3b59",
+          borderRadius: "14px",
+          color: "#ffffff",
+          padding: "10px 14px",
+        }}
+      >
+        {item.label} : {item.value}
+      </div>
+    );
+  }}
+/>
           <Bar
             dataKey="value"
             radius={[10, 10, 0, 0]}

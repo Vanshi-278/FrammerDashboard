@@ -39,6 +39,9 @@ export default function DistributionPieChart({
     fill: COLORS[index % COLORS.length],
   }));
 
+  // ✅ FIX: move this here (outside JSX)
+  const total = formattedData.reduce((sum, item) => sum + item.value, 0);
+
   return (
     <div className="h-[360px] w-full rounded-[24px] border border-[#22304a] bg-[#0b1630] p-4">
       <ResponsiveContainer width="100%" height="100%">
@@ -79,10 +82,12 @@ export default function DistributionPieChart({
               color: "#ffffff",
             }}
             labelStyle={{ color: "#cbd5e1", fontWeight: 600 }}
-            formatter={(value: number, _name, props) => [
-              `${value}`,
-              props?.payload?.label || "Value",
-            ]}
+            formatter={(value: number, _name, props) => {
+              const percent = total
+                ? ((value / total) * 100).toFixed(1)
+                : "0.0";
+              return [`${value} (${percent}%)`, props?.payload?.label || "Value"];
+            }}
           />
 
           <Legend
