@@ -16,7 +16,8 @@ export default function ChannelBar({
 channels = [],
 types = [],
 users = [],
-platform = ""
+platform = "",
+barColor = "#6366f1"
 }: any){
 
 const [tab,setTab] = useState("videos")
@@ -82,7 +83,10 @@ Channel Analytics
 </h2>
 
 <p className="text-slate-400 text-sm mb-4">
-Platform: <span className="text-indigo-400 font-medium">{platform}</span>
+Platform: <span className="inline-flex items-center gap-1">
+  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: barColor }}></span>
+  <span className="text-indigo-400 font-medium">{platform || "All"}</span>
+</span>
 </p>
 
 {/* Tabs */}
@@ -92,7 +96,7 @@ Platform: <span className="text-indigo-400 font-medium">{platform}</span>
 <button
 disabled={isAllZero(channelData,"videos")}
 onClick={()=>setTab("videos")}
-className={`tab ${tab==="videos"?"active":""}`}
+className={`px-3 py-1 rounded text-sm transition ${tab==="videos" ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-200 hover:bg-slate-600"} ${isAllZero(channelData,"videos") ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
 >
 Videos
 </button>
@@ -100,7 +104,7 @@ Videos
 <button
 disabled={isAllZero(channelData,"duration")}
 onClick={()=>setTab("duration")}
-className={`tab ${tab==="duration"?"active":""}`}
+className={`px-3 py-1 rounded text-sm transition ${tab==="duration" ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-200 hover:bg-slate-600"} ${isAllZero(channelData,"duration") ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
 >
 Duration
 </button>
@@ -108,7 +112,7 @@ Duration
 <button
 disabled={isAllZero(channelData,"efficiency")}
 onClick={()=>setTab("efficiency")}
-className={`tab ${tab==="efficiency"?"active":""}`}
+className={`px-3 py-1 rounded text-sm transition ${tab==="efficiency" ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-200 hover:bg-slate-600"} ${isAllZero(channelData,"efficiency") ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
 >
 Efficiency
 </button>
@@ -116,7 +120,7 @@ Efficiency
 <button
 disabled={isAllZero(typeData,"value")}
 onClick={()=>setTab("types")}
-className={`tab ${tab==="types"?"active":""}`}
+className={`px-3 py-1 rounded text-sm transition ${tab==="types" ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-200 hover:bg-slate-600"} ${isAllZero(typeData,"value") ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
 >
 Content Types
 </button>
@@ -124,7 +128,7 @@ Content Types
 <button
 disabled={isAllZero(userData,"value")}
 onClick={()=>setTab("users")}
-className={`tab ${tab==="users"?"active":""}`}
+className={`px-3 py-1 rounded text-sm transition ${tab==="users" ? "bg-indigo-500 text-white" : "bg-slate-700 text-slate-200 hover:bg-slate-600"} ${isAllZero(userData,"value") ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
 >
 Top Users
 </button>
@@ -133,7 +137,7 @@ Top Users
 
 <ResponsiveContainer width="100%" height={300}>
 
-<BarChart data={data}>
+<BarChart data={data} barGap={8} barCategoryGap="20%">
 
 <CartesianGrid stroke="#1e293b" strokeDasharray="3 3"/>
 
@@ -145,7 +149,8 @@ Top Users
 
 <Bar
 dataKey={yKey}
-fill="#6366f1"
+fill={barColor}
+barSize={24}
 radius={[6,6,0,0]}
 />
 

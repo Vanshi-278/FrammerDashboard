@@ -8,7 +8,7 @@ from services.loader import (
     load_channel_publish,
     load_channel_duration,
     load_monthly_duration,
-    load_users
+    load_channel_user
 )
 
 # ---------------- LOAD DATA ---------------- #
@@ -18,9 +18,14 @@ monthly_df = load_monthly_chart()
 client_df = load_clients()
 channel_df = load_channel_publish()
 duration_df = load_monthly_duration()
-users_df = load_users()
+users_df = load_channel_user()
 channel_duration_df = load_channel_duration()
 weekly_df = None
+
+# ================= Limits ================= #
+
+top_limit = 10
+lower_limit = 10
 
 # ================= HELPERS ================= #
 
@@ -187,7 +192,7 @@ def get_users_by_channel(channel, metric, type, period):
 
 # ================= SORT ================= #
 
-def process_data(df, order="desc", limit=20, exclude_top=None):
+def process_data(df, order="desc", limit=top_limit, exclude_top=None):
 
     ascending = (order == "asc")
 
@@ -215,7 +220,7 @@ def get_contributions(
     # -------- MAIN -------- #
 
     if level == "client":
-        df = aggregate_clients(metric, type, period)
+        df = aggregate_clients(metric, type, period).head(top_limit)
 
         if type == "underused" and len(df) <= 1:
             main = []
@@ -228,8 +233,8 @@ def get_contributions(
         top_names = None
         if type == "underused":
             top_df = aggregate_channels(metric, "top", period)
-            top_names = top_df.sort_values("value", ascending=False).head(20)["name"]
-
+            top_names = top_df.sort_values("value", ascending=False).head(top_limit)["name"]
+            print(f"Total channels: {len(df)}, Top names to exclude: {len(top_names)}")
         main = process_data(df, order, exclude_top=top_names)
 
     elif level == "user":
@@ -238,7 +243,7 @@ def get_contributions(
         top_names = None
         if type == "underused":
             top_df = aggregate_users(metric, "top", period)
-            top_names = top_df.sort_values("value", ascending=False).head(20)["name"]
+            top_names = top_df.sort_values("value", ascending=False).head(top_limit)["name"]
 
         main = process_data(df, order, exclude_top=top_names)
 
@@ -312,7 +317,7 @@ def duration_trend(period="month"):
     ]
 
 def top_users():
-    df = users_df.sort_values("Published Count", ascending=False).head(10)
+    df = users_df.sort_values("Published Count", ascending=False).head(top_limit)
     return [{"user": r["User"], "published": int(r["Published Count"])} for _, r in df.iterrows()]
 
 def channel_usage():

@@ -102,17 +102,21 @@ def get_kpis():
         "publish_rate": publish_rate,
         "video_shortening_percent": int(duration_metrics['video_shortening_percent']),
         "avg_published_duration(for 1 hour)": str(one_hour_metrics["avg_pub_time"]),
-        "compression %(for one hour)": one_hour_metrics["compression_ratio"]
+        "compression percent(for one hour)": one_hour_metrics["compression_ratio"]
     }
 
 
 def monthly_trend():
 
+    df = monthly_df.copy()
+    df["Month"] = pd.to_datetime(df["Month"], format="%b, %Y", errors="coerce")
+    df = df.sort_values("Month")
+
     result = []
-    for _, row in monthly_df.iterrows():
+    for _, row in df.iterrows():
 
         result.append({
-            "Month": row["Month"],
+            "Month": row["Month"].strftime("%b, %Y") if not pd.isna(row["Month"]) else "",
             "Total Uploaded": int(row["Total Uploaded"]),
             "Total Created": int(row["Total Created"]),
             "Total Published": int(row["Total Published"])
@@ -121,11 +125,6 @@ def monthly_trend():
     return result
 
 def duration_to_hours(duration_str):
-    """
-    Convert hh:mm:ss string to decimal hours
-    Example: '01:30:00' -> 1.5
-    """
-
     if duration_str is None:
         return 0
 
@@ -144,9 +143,13 @@ def duration_to_hours(duration_str):
 
 def monthly_duration_trend():
 
+    df = duration_df.copy()
+    df["Month"] = pd.to_datetime(df["Month"], format="%b, %Y", errors="coerce")
+    df = df.sort_values("Month")
+
     result = []
 
-    for _, row in duration_df.iterrows():
+    for _, row in df.iterrows():
 
         uploaded = duration_to_hours(row["Total Uploaded Duration"])
         created = duration_to_hours(row["Total Created Duration"])
@@ -161,10 +164,10 @@ def monthly_duration_trend():
 
         result.append({
 
-            "Month": row["Month"],
+            "Month": row["Month"].strftime("%b, %Y") if not pd.isna(row["Month"]) else "",
 
             "Total Uploaded Duration": uploaded,
-            "Total Created Duration": created,
+            "Total Created   Duration": created,
             "Total Published Duration": published,
 
             "Compression Rate": compression_rate,

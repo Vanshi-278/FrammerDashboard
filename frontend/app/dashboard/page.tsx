@@ -122,11 +122,21 @@ export default function DashboardPage() {
   const [duration, setDuration] = useState([]);
 
   const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [barColor, setBarColor] = useState("#6366f1");
 
-  const handlePlatformClick = async (platform: string) => {
-    setSelectedPlatform(platform);
+  const handlePlatformClick = async (selection: any) => {
+     const platformName =
+      typeof selection === "string"
+        ? selection
+        : selection?.platform || selection?.name || "";
+    const color = selection?.color || "#6366f1";
 
-    const res = await fetchChannels(platform);
+    if (!platformName) return;
+
+    setSelectedPlatform(platformName);
+    setBarColor(color);
+
+    const res = await fetchChannels(platformName);
 
     setChannels(res.data.channels);
     setTypes(res.data.types);
@@ -163,6 +173,7 @@ export default function DashboardPage() {
           types={types}
           users={users}
           platform={selectedPlatform}
+          barColor={barColor}
         />
       </div>
     </div>

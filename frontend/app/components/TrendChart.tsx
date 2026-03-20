@@ -115,7 +115,7 @@ strokeWidth={3}
 
 <Line
 type="monotone"
-dataKey="Total Created"
+dataKey="Total Processed"
 stroke="#22c55e"
 strokeWidth={3}
 />

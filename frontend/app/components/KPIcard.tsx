@@ -8,6 +8,8 @@ export default function KPIcard({ title, value }: any) {
   const isNumber = typeof value === "number"
   const numberValue = isNumber ? parseFloat(value) : 0
   const trend = Math.random() > 0.5 ? "up" : "down" // replace later with backend metric
+  const showPercent = title.toLowerCase().includes("rate") || title.toLowerCase().includes("percent")
+  const suffix = showPercent ? "%" : ""
 
   return (
 
@@ -27,31 +29,26 @@ export default function KPIcard({ title, value }: any) {
           <h2 className="text-3xl font-bold text-white">
 
             {isNumber ? (
-              <CountUp
-                end={numberValue}
-                duration={2}
-                separator=","
-                decimals={numberValue % 1 !== 0 ? 2 : 0}
-              />
+              <>
+                <CountUp
+                  end={numberValue}
+                  duration={2}
+                  separator=","
+                  decimals={numberValue % 1 !== 0 ? 2 : 0}
+                />
+                {suffix}
+              </>
             ) : (
-              value
+              `${value}${suffix}`
             )}
-
           </h2>
 
-          <div className={`flex items-center text-sm ${
-            trend === "up" ? "text-green-400" : "text-red-400"
-          }`}>
-
-            {trend === "up" ? <TrendingUp size={18}/> : <TrendingDown size={18}/>}
 
           </div>
 
         </div>
 
       </div>
-
-    </div>
 
   )
 }

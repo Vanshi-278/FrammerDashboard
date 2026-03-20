@@ -38,9 +38,7 @@ export default function DurationTrend() {
           Duration Trend (Hours)
         </h2>
 
-        {/* Tabs */}
         <div className="flex gap-2 bg-[#0b1a3a] p-1 rounded-lg">
-
           {["month","week","day"].map((p)=>(
             <button
               key={p}
@@ -58,7 +56,6 @@ export default function DurationTrend() {
               {p}
             </button>
           ))}
-
         </div>
 
       </div>
@@ -70,23 +67,23 @@ export default function DurationTrend() {
 
           {/* Gradients */}
           <defs>
-            <linearGradient id="durUpload" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="colorUpload" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#6366F1" stopOpacity={0.75}/>
               <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
             </linearGradient>
 
-            <linearGradient id="durProcessed" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#FF4D5A" stopOpacity={0.75}/>
-              <stop offset="95%" stopColor="#FF4D5A" stopOpacity={0}/>
+            <linearGradient id="colorProcessed" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#e11e1e" stopOpacity={0.75}/>
+              <stop offset="95%" stopColor="#e11e1e" stopOpacity={0}/>
             </linearGradient>
 
-            <linearGradient id="durPublished" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.75}/>
-              <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
+            <linearGradient id="colorPublished" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#EC4899" stopOpacity={0.75}/>
+              <stop offset="95%" stopColor="#EC4899" stopOpacity={0}/>
             </linearGradient>
           </defs>
 
-          <CartesianGrid strokeDasharray="3 3" stroke="#1a2540" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1f2a44" />
 
           <XAxis dataKey="period" stroke="#9CA3AF"/>
           <YAxis stroke="#9CA3AF"/>
@@ -102,31 +99,28 @@ export default function DurationTrend() {
 
           <Legend />
 
-          {/* Stacked Areas */}
+          {/* Areas (NO STACKING) */}
           <Area
             type="monotone"
             dataKey="uploaded_duration"
-            stackId="1"
             stroke="#6366F1"
-            fill="url(#durUpload)"
+            fill="url(#colorUpload)"
             strokeWidth={2}
           />
 
           <Area
             type="monotone"
             dataKey="processed_duration"
-            stackId="1"
-            stroke="#FF4D5A"
-            fill="url(#durProcessed)"
+            stroke="#e11e1e"
+            fill="url(#colorProcessed)"
             strokeWidth={2}
           />
 
           <Area
             type="monotone"
             dataKey="published_duration"
-            stackId="1"
-            stroke="#14B8A6"
-            fill="url(#durPublished)"
+            stroke="#EC4899"
+            fill="url(#colorPublished)"
             strokeWidth={2}
           />
 

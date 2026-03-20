@@ -12,11 +12,13 @@ ResponsiveContainer
 
 const COLORS=[
 "#ff4d4f",
-"#ec4899",
 "#8b5cf6",
 "#3b82f6",
 "#06b6d4",
-"#64748b"
+"#ee84f5",
+"#27b96b",
+"#ebe19b",
+
 ]
 
 export default function PlatformPie({data,onSelect}:any){
@@ -30,7 +32,7 @@ if(data && data.length>0){
 const maxPlatform = data.reduce((prev:any,current:any)=>
 prev.value>current.value?prev:current)
 
-onSelect(maxPlatform.platform)
+onSelect({platform: maxPlatform.platform, color: COLORS[0]})  // default first color
 
 }
 
@@ -49,13 +51,20 @@ Platform Distribution
 <PieChart>
 
 <Pie
-data={data}
-dataKey="value"
-nameKey="platform"
-innerRadius={isDonut?70:0}
-outerRadius={110}
-paddingAngle={3}
-onClick={(d:any)=>onSelect(d.platform)}
+  data={data}
+  dataKey="value"
+  nameKey="platform"
+  innerRadius={isDonut ? 70 : 0}
+  outerRadius={110}
+  paddingAngle={3}
+  onClick={(entry: any) => {
+    const platformName = entry?.payload?.platform || entry?.payload?.name || entry?.name || "";
+    const idx = data.findIndex((item: any) => item.platform === platformName || item.name === platformName);
+    const selectedColor = COLORS[idx >= 0 ? idx % COLORS.length : 0];
+    if (platformName) {
+      onSelect({ platform: platformName, color: selectedColor });
+    }
+  }}
 >
 
 {data.map((entry:any,index:number)=>(
