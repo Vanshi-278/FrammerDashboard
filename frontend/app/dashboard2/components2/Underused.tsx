@@ -7,10 +7,10 @@ import {
 } from "recharts"
 import { getContributions } from "@/services/api2"
 
-export default function TopContributions(){
+export default function UnderusedContributions(){
 
   const [level,setLevel] = useState("client")
-  const [metric,setMetric] = useState("published")
+  const [metric,setMetric] = useState("efficiency")
   const [period,setPeriod] = useState("year") // 🔥 NEW
 
   const [data,setData] = useState<any[]>([])
@@ -21,13 +21,13 @@ export default function TopContributions(){
   },[level,metric,period])
 
   const load = async()=>{
-    const res = await getContributions(level, undefined, metric, "top", period)
+    const res = await getContributions(level, undefined, metric, "underused", period)
     setData(res.main)
     setDrillData([])
   }
 
   const handleClick = async (item:any)=>{
-    const res = await getContributions(level, item.name, metric, "top", period)
+    const res = await getContributions(level, item.name, metric, "underused", period)
     setDrillData(res.drill)
   }
 
@@ -39,7 +39,7 @@ export default function TopContributions(){
       <div className="flex flex-col gap-4">
 
         <h2 className="text-white text-xl font-semibold">
-          Top Contributions
+          Underused Potential 🚨
         </h2>
 
         {/* 🔥 CONTROLS */}
@@ -54,7 +54,7 @@ export default function TopContributions(){
                 onClick={()=>setLevel(p)}
                 className={`px-3 py-1 rounded text-sm transition ${
                   level===p
-                    ? "bg-green-400 text-black"
+                    ? "bg-red-400 text-black"
                     : "bg-gray-700 text-white hover:bg-gray-600"
                 }`}
               >
@@ -63,7 +63,7 @@ export default function TopContributions(){
             ))}
           </div>
 
-          {/* METRIC */}
+          {/* METRIC (future-proof) */}
           <div className="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg">
             <span className="text-xs text-gray-400 mr-2">Metric</span>
 
@@ -72,11 +72,11 @@ export default function TopContributions(){
                 onClick={()=>setMetric(m)}
                 className={`px-3 py-1 rounded text-sm transition ${
                   metric===m
-                    ? "bg-blue-400 text-black"
+                    ? "bg-red-400 text-black"
                     : "bg-gray-700 text-white hover:bg-gray-600"
                 }`}
               >
-                {m}
+                {m === "efficiency" ? "unused %" : m}
               </button>
             ))}
           </div>
@@ -136,7 +136,7 @@ export default function TopContributions(){
 
                 <Bar
                   dataKey="value"
-                  fill="#60A5FA"
+                  fill="#F87171"
                   radius={[6,6,0,0]}
                   barSize={28}
                   onClick={(d)=>handleClick(d)}
@@ -154,7 +154,7 @@ export default function TopContributions(){
 
           {drillData.length === 0 ? (
             <div className="h-full flex items-center justify-center text-gray-400">
-              Click a bar to drill down
+              Click a bar to see wasted potential
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -178,7 +178,7 @@ export default function TopContributions(){
 
                 <Bar
                   dataKey="value"
-                  fill="#A78BFA"
+                  fill="#FB7185"
                   radius={[6,6,0,0]}
                   barSize={28}
                 />
