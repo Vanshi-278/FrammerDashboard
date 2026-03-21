@@ -17,7 +17,7 @@ def _read_csv(filename: str) -> pd.DataFrame:
 
 
 def load_video_details():
-<<<<<<< HEAD
+
     return _read_csv("video_list_data_obfuscated.csv")
 
 
@@ -71,7 +71,7 @@ def load_output():
 
 def load_language():
     return _read_csv("combined_data(2025-3-1-2026-2-28) by language.csv")
-=======
+
     path = os.path.join(DATA_DIR, "video_list_data_obfuscated copy.csv")
     return pd.read_csv(path)
 
@@ -102,4 +102,4 @@ def load_monthly_duration():
 def load_users():
     path = os.path.join(DATA_DIR, "combined_data(2025-3-1-2026-2-28) by channel and user.csv")
     return pd.read_csv(path)
->>>>>>> 7cbc3f8 (added data files to deployment)
+
