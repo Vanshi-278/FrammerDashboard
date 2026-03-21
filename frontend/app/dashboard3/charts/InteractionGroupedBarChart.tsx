@@ -12,6 +12,7 @@ import {
   Legend,
   Cell,
 } from "recharts";
+
 import {
   InteractionChartMode,
   InteractionMatrixRow,
@@ -78,69 +79,35 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
         minWidth: "240px",
         maxWidth: "320px",
-        pointerEvents: "auto",
       }}
     >
-      <div
-        style={{
-          fontWeight: 700,
-          marginBottom: 10,
-          color: "#ffffff",
-          fontSize: "15px",
-        }}
-      >
+      <div style={{ fontWeight: 700, marginBottom: 10 }}>
         {label}
       </div>
 
-      <div
-        style={{
-          maxHeight: "190px",
-          overflowY: "auto",
-          overflowX: "hidden",
-          direction: "rtl",
-          width: "100%",
-          scrollbarWidth: "thin",
-        }}
-      >
+      {items.map((entry, index) => (
         <div
+          key={`${entry?.dataKey}-${index}`}
           style={{
-            direction: "ltr",
-            paddingLeft: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "8px",
+            color: entry?.color || "#ffffff",
           }}
         >
-          {items.map((entry, index) => (
-            <div
-              key={`${entry?.dataKey}-${index}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "8px",
-                color: entry?.color || "#ffffff",
-                fontSize: "14px",
-                fontWeight: 500,
-                lineHeight: 1.3,
-                whiteSpace: "normal",
-                wordBreak: "break-word",
-              }}
-            >
-              <span
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "2px",
-                  background: entry?.color || "#ffffff",
-                  flexShrink: 0,
-                }}
-              />
-              <span>
-                {entry?.name}:{" "}
-                <span style={{ color: "#ffffff" }}>{entry?.value}</span>
-              </span>
-            </div>
-          ))}
+          <span
+            style={{
+              width: "10px",
+              height: "10px",
+              background: entry?.color || "#fff",
+            }}
+          />
+          <span>
+            {entry?.name}: {entry?.value}
+          </span>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -171,81 +138,58 @@ export default function InteractionGroupedBarChart({
         <div style={{ width: `${chartWidth}px`, minWidth: "100%" }}>
           <div className="h-[430px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data}
-                margin={{ top: 10, right: 20, left: 0, bottom: 50 }}
-                barCategoryGap="18%"
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#22304a"
-                  vertical={false}
-                />
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#22304a" />
 
-                <XAxis
-                  dataKey="rowLabel"
-                  interval={0}
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  axisLine={{ stroke: "#314158" }}
-                  tickLine={{ stroke: "#314158" }}
-                />
+                <XAxis dataKey="rowLabel" />
+                <YAxis domain={metric === "publish_rate" ? [0, 100] : [0, "auto"]} />
 
-                <YAxis
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  axisLine={{ stroke: "#314158" }}
-                  tickLine={{ stroke: "#314158" }}
-                  domain={metric === "publish_rate" ? [0, 100] : [0, "auto"]}
-                />
+                <Tooltip content={<CustomTooltip />} />
 
-                <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.06)" }}
-                  content={<CustomTooltip />}
-                  wrapperStyle={{
-                    pointerEvents: "auto",
-                    zIndex: 1000,
-                  }}
-                  isAnimationActive={false}
-                />
-
+                {/* ✅ FIXED LEGEND */}
                 <Legend
-                  payload={visibleLegendPayload}
-                  wrapperStyle={{
-                    color: "#cbd5e1",
-                    paddingTop: "18px",
-                    cursor: "pointer",
-                  }}
-                  onClick={(e: any) => {
-                    if (!e?.dataKey) return;
-                    setActiveKey((prev) => (prev === e.dataKey ? null : e.dataKey));
-                  }}
+                  content={() => (
+                    <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                      {visibleLegendPayload.map((item) => (
+                        <div
+                          key={item.dataKey}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            cursor: "pointer",
+                            color: "#cbd5e1",
+                          }}
+                          onClick={() =>
+                            setActiveKey((prev) =>
+                              prev === item.dataKey ? null : item.dataKey
+                            )
+                          }
+                        >
+                          <span
+                            style={{
+                              width: 10,
+                              height: 10,
+                              background: item.color,
+                            }}
+                          />
+                          {item.value}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 />
 
                 {cols.map((col, index) => {
                   const color = COLORS[index % COLORS.length];
-                  const isSeriesActive = !activeKey || activeKey === col;
+                  const isActive = !activeKey || activeKey === col;
 
                   return (
-                    <Bar
-                      key={col}
-                      dataKey={col}
-                      fill={color}
-                      stackId={mode === "stacked" ? "interaction" : undefined}
-                      radius={mode === "stacked" ? [0, 0, 0, 0] : [6, 6, 0, 0]}
-                      onClick={() =>
-                        setActiveKey((prev) => (prev === col ? null : col))
-                      }
-                    >
+                    <Bar key={col} dataKey={col} fill={color}>
                       {data.map((_, i) => (
                         <Cell
                           key={`${col}-${i}`}
-                          fill={color}
-                          fillOpacity={!activeKey ? 1 : isSeriesActive ? 1 : 0.9}
-                          stroke={activeKey === col ? "#ffffff" : "none"}
-                          strokeWidth={activeKey === col ? 2 : 0}
-                          style={{
-                            cursor: "pointer",
-                            transition: "all 0.2s ease",
-                          }}
+                          fillOpacity={isActive ? 1 : 0.3}
                         />
                       ))}
                     </Bar>
@@ -259,7 +203,7 @@ export default function InteractionGroupedBarChart({
 
       {hiddenLegendCount > 0 && (
         <div className="mt-2 text-sm text-[#94a3b8]">
-          Showing first {MAX_LEGEND_ITEMS} users in legend. +{hiddenLegendCount} more are available in the tooltip on hover.
+          Showing first {MAX_LEGEND_ITEMS} users. +{hiddenLegendCount} more in tooltip.
         </div>
       )}
     </div>
