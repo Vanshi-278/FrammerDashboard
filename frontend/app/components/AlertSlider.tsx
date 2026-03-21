@@ -1,37 +1,52 @@
+
 "use client"
 
-import {useState,useEffect} from "react"
+import { useEffect, useState } from "react"
 
-export default function AlertsSlider({alerts}:any){
+type Alert = {
+  type: "critical" | "warning" | "info"
+  message: string
+}
 
-const [index,setIndex]=useState(0)
+export default function Alerts({ alerts }: { alerts: Alert[] }) {
 
-useEffect(()=>{
+  const [index, setIndex] = useState(0)
 
-const timer=setInterval(()=>{
+  useEffect(() => {
+    if (!alerts || alerts.length === 0) return
 
-setIndex((prev)=>(prev+1)%alerts.length)
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % alerts.length)
+    }, 3000) // 3 sec
 
-},4000)
+    return () => clearInterval(interval)
+  }, [alerts])
 
-return ()=>clearInterval(timer)
+  if (!alerts || alerts.length === 0) return null
 
-},[alerts])
+  const a = alerts[index]
 
-if(!alerts.length)return null
+  let bg = ""
+  let border = ""
 
-return(
+  if (a.type === "critical") {
+    bg = "bg-red-900/40"
+    border = "border-red-500"
+  } else if (a.type === "warning") {
+    bg = "bg-yellow-900/40"
+    border = "border-yellow-500"
+  } else {
+    bg = "bg-blue-900/40"
+    border = "border-blue-500"
+  }
 
-<div className="bg-red-900/30 border border-red-700 p-4 rounded-xl">
-
-<p className="text-400 text-white">
-
-⚠ {alerts[index]}
-
-</p>
-
-</div>
-
-)
-
+  return (
+    <div className="mb-6">
+      <div
+        className={`p-4 rounded-xl border ${bg} ${border} text-white transition-all duration-500`}
+      >
+        ⚠ {a.message}
+      </div>
+    </div>
+  )
 }

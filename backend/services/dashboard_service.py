@@ -9,6 +9,16 @@ from services.loader import (
     load_users
 )
 
+from services.dashboard3_service import(
+    get_platform_distribution, 
+    get_distribution
+)
+
+from services.dashboard4_services import(
+    get_output_distribution,
+    get_input_type_data,
+)
+
 import datetime
 import math
 
@@ -167,7 +177,7 @@ def monthly_duration_trend():
             "Month": row["Month"].strftime("%b, %Y") if not pd.isna(row["Month"]) else "",
 
             "Total Uploaded Duration": uploaded,
-            "Total Created   Duration": created,
+            "Total Created Duration": created,
             "Total Published Duration": published,
 
             "Compression Rate": compression_rate,
@@ -306,14 +316,102 @@ def channel_contribution(platform):
         "types": type_result,
         "users": user_result
     }
-   
 def alerts():
 
     alerts_list = []
 
-    if get_kpis()["publish_rate"] < 60:
-        alerts_list.append("Publish rate below 60%")
+    kpis = get_kpis()
 
-    alerts_list.append("Spike detected in uploads this month")
+    # ================== GLOBAL ALERT ==================
+    if kpis["publish_rate"] < 60:
+        alerts_list.append({
+            "type": "critical",
+            "message": f"Overall publish rate is low ({kpis['publish_rate']}%)"
+        })
+
+    # ================== OUTPUT TYPE ALERT ==================
+    output_data = get_output_distribution()
+
+    for item in output_data:
+        created = item.get("created_count", 0)
+        published = item.get("published_count", 0)
+
+        if created > 0:
+            rate = (published / created) * 100
+
+            if rate < 40:
+                alerts_list.append({
+                    "type": "warning",
+                    "message": f"{item['output_type']} has low publish rate ({round(rate,2)}%)"
+                })
+
+    # ================== INPUT TYPE ALERT ==================
+    input_data = get_input_type_data()
+
+    for item in input_data:
+        created = item.get("created_count", 0)
+        published = item.get("published_count", 0)
+
+        if created > 0:
+            rate = (published / created) * 100
+
+            if rate < 40:
+                alerts_list.append({
+                    "type": "warning",
+                    "message": f"{item['input_type']} content underperforming ({round(rate,2)}% publish rate)"
+                })
+
+    # ================== PLATFORM ALERT ==================
+    platforms = platform_distribution()
+
+    total = sum([p["value"] for p in platforms]) or 1
+
+    for p in platforms:
+        share = (p["value"] / total) * 100
+
+        if share < 5:
+            alerts_list.append({
+                "type": "info",
+                "message": f"{p['platform']} is underutilized ({round(share,2)}% share)"
+            })
+
+    # ================== LANGUAGE ALERT ==================
+    language_data = get_distribution("language")
+
+    total_lang = sum([l["value"] for l in language_data]) or 1
+
+    for l in language_data:
+        share = (l["value"] / total_lang) * 100
+
+        if share < 5:
+            alerts_list.append({
+                "type": "info",
+                "message": f"{l['label']} language usage is low ({round(share,2)}%)"
+            })
+
+    # ================== TOP DROP-OFF ALERT ==================
+    worst_output = None
+    worst_rate = 100
+
+    for item in output_data:
+        created = item.get("created_count", 0)
+        published = item.get("published_count", 0)
+
+        if created > 0:
+            rate = (published / created) * 100
+
+            if rate < worst_rate:
+                worst_rate = rate
+                worst_output = item["output_type"]
+
+    if worst_output:
+        alerts_list.append({
+            "type": "critical",
+            "message": f"Worst performing output: {worst_output} ({round(worst_rate,2)}% publish rate)"
+        })
+
+    # ================== SORT BY PRIORITY ==================
+    priority = {"critical": 1, "warning": 2, "info": 3}
+    alerts_list = sorted(alerts_list, key=lambda x: priority[x["type"]])
 
     return alerts_list
