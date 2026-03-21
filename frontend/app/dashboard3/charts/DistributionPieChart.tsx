@@ -8,6 +8,13 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+
+import type {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
+import type { TooltipProps } from "recharts";
+
 import { DistributionItem } from "../../../lib/dashboard3-types";
 
 type Props = {
@@ -15,6 +22,15 @@ type Props = {
   activeLabel: string | null;
   onSelect: (label: string) => void;
 };
+
+interface ChartEntry {
+  label?: string;
+  name?: string;
+  payload?: {
+    label?: string;
+    name?: string;
+  };
+}
 
 const COLORS = [
   "#6D4AFF",
@@ -39,8 +55,22 @@ export default function DistributionPieChart({
     fill: COLORS[index % COLORS.length],
   }));
 
-  // ✅ FIX: move this here (outside JSX)
   const total = formattedData.reduce((sum, item) => sum + item.value, 0);
+
+  // ✅ Correctly typed formatter (IMPORTANT FIX)
+  const tooltipFormatter: TooltipProps<ValueType, NameType>["formatter"] = (
+    value,
+    _name,
+    item
+  ) => {
+    const val = Number(value) || 0;
+    const percent = total ? ((val / total) * 100).toFixed(1) : "0.0";
+
+    const label =
+      (item?.payload as ChartEntry)?.label || "Value";
+
+    return [`${val} (${percent}%)`, label];
+  };
 
   return (
     <div className="h-[360px] w-full rounded-[24px] border border-[#22304a] bg-[#0b1630] p-4">
@@ -55,23 +85,25 @@ export default function DistributionPieChart({
             innerRadius={70}
             outerRadius={120}
             paddingAngle={3}
-            onClick={(entry) => onSelect(entry.label)}
+            onClick={(entry: unknown) => {
+              const e = entry as ChartEntry;
+              const label =
+                e?.label || e?.name || e?.payload?.label;
+              if (label) onSelect(label);
+            }}
           >
-            {formattedData.map((item) => {
-              const isActive = activeLabel === item.label;
-              const hasSelection = !!activeLabel;
-
-              return (
-                <Cell
-                  key={item.label}
-                  fill={item.fill}
-                  fillOpacity={!hasSelection ? 1 : isActive ? 1 : 0.35}
-                  stroke={isActive ? "#ffffff" : "#0b1630"}
-                  strokeWidth={isActive ? 3 : 1}
-                  style={{ cursor: "pointer" }}
-                />
-              );
-            })}
+            {formattedData.map((item) => (
+              <Cell
+                key={item.label}
+                fill={item.fill}
+                fillOpacity={
+                  activeLabel && activeLabel !== item.label ? 0.35 : 1
+                }
+                stroke={activeLabel === item.label ? "#ffffff" : "#0b1630"}
+                strokeWidth={activeLabel === item.label ? 3 : 1}
+                style={{ cursor: "pointer" }}
+              />
+            ))}
           </Pie>
 
           <Tooltip
@@ -82,20 +114,10 @@ export default function DistributionPieChart({
               color: "#ffffff",
             }}
             labelStyle={{ color: "#cbd5e1", fontWeight: 600 }}
-            formatter={(value: number, _name, props) => {
-              const percent = total
-                ? ((value / total) * 100).toFixed(1)
-                : "0.0";
-              return [`${value} (${percent}%)`, props?.payload?.label || "Value"];
-            }}
+            formatter={tooltipFormatter}
           />
 
-          <Legend
-            wrapperStyle={{
-              color: "#cbd5e1",
-              paddingTop: "12px",
-            }}
-          />
+          <Legend wrapperStyle={{ color: "#cbd5e1", paddingTop: "12px" }} />
         </PieChart>
       </ResponsiveContainer>
     </div>
