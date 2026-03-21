@@ -13,7 +13,7 @@ export default function Chatbot({
 }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<
-    { sender: "user" | "bot"; text: string }[]
+    { sender: "user" | "bot"; text: string; data?: any[]; columns?: string[]; sql?: string }[]
   >([]);
   const [animation, setAnimation] = useState<any>(null);
 
