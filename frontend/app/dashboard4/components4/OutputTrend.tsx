@@ -36,7 +36,8 @@ export default function OutputTrend(){
 
  useEffect(() => {
   fetchOutputTrend().then(res => {
-    setData(res.data)
+    console.log("API RESPONSE 👉", res)
+    setData(res || [] )
   })
 }, [])
 

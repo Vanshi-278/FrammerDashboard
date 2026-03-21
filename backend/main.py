@@ -25,11 +25,6 @@ app.add_middleware(
 def home():
     return {"message": "Backend running"}
 
-# optional root
-@app.get("/")
-def home():
-    return {"message": "Backend running"}
-
 # routers
 app.include_router(dashboard_router, prefix="/api")
 app.include_router(dashboard3_router, prefix="/api")

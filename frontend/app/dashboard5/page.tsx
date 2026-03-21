@@ -20,10 +20,10 @@ interface VideoDetail {
 }
 
 interface FilterOptions {
-  team_names: string[];
-  types: string[];
-  uploaded_by: string[];
-  published_platforms: string[];
+  team_names?: string[];
+  types?: string[];
+  uploaded_by?: string[];
+  published_platforms?: string[];
 }
 
 const TABLE_COLUMNS = [
@@ -38,7 +38,6 @@ const TABLE_COLUMNS = [
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 hover:underline"
-          title={value}
         >
           Src
         </a>
@@ -62,7 +61,6 @@ const TABLE_COLUMNS = [
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 hover:underline"
-          title={value}
         >
           Link
         </a>
@@ -76,11 +74,11 @@ export default function Dashboard5Page() {
   const [filters, setLocalFilters] = useState<Record<string, any>>({});
   const [page, setPage] = useState(0);
   const [triggerFetch, setTriggerFetch] = useState(0);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({});
   const [loadingOptions, setLoadingOptions] = useState(true);
 
-  const { data, total, loading } = usePaginatedData<VideoDetail>({
-    endpoint: '/dashboard/video-details',
+  const { data = [], total = 0, loading } = usePaginatedData<VideoDetail>({
+    endpoint: '/api/dashboard/video-details',
     limit: 10,
     filters,
     page,
@@ -89,35 +87,42 @@ export default function Dashboard5Page() {
 
   const [dataQuality, setDataQuality] = useState<{
     total_records: number;
-    fields: Array<{ field: string; total: number; missing: number; missing_pct: number; complete_pct: number }>;
+    fields: Array<{
+      field: string;
+      total: number;
+      missing: number;
+      missing_pct: number;
+      complete_pct: number;
+    }>;
   } | null>(null);
+
   const [loadingQuality, setLoadingQuality] = useState(true);
 
-
-  // Fetch filter options on component mount
+  // 🔥 Fetch filter options safely
   useEffect(() => {
-    const fetchFilterOptions = async () => {
+    const fetchData = async () => {
       try {
         const apiUrl = getApiUrl();
+
         const [optsRes, qualityRes] = await Promise.all([
-          fetch(`${apiUrl}/dashboard/filter-options`),
-          fetch(`${apiUrl}/dashboard/data-quality`),
+          fetch(`${apiUrl}/api/dashboard/filter-options`),
+          fetch(`${apiUrl}/api/dashboard/data-quality`),
         ]);
 
         const options = await optsRes.json();
         const quality = await qualityRes.json();
 
-        setFilterOptions(options);
-        setDataQuality(quality);
+        setFilterOptions(options || {}); // 👈 fallback safe
+        setDataQuality(quality || null);
       } catch (error) {
-        console.error('Error fetching filter options or quality:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoadingOptions(false);
         setLoadingQuality(false);
       }
     };
 
-    fetchFilterOptions();
+    fetchData();
   }, []);
 
   const totalPages = Math.ceil(total / 10);
@@ -135,10 +140,15 @@ export default function Dashboard5Page() {
   };
 
   const handleExport = () => {
-    exportToCSV(data, TABLE_COLUMNS, 'video-details.csv');
+    exportToCSV(data || [], TABLE_COLUMNS, 'video-details.csv');
   };
 
-  // Build filter config dynamically
+  // 🔥 SAFE arrays (THIS IS KEY FIX)
+  const teamNames = filterOptions.team_names || [];
+  const types = filterOptions.types || [];
+  const uploadedBy = filterOptions.uploaded_by || [];
+  const platforms = filterOptions.published_platforms || [];
+
   const filterConfig = [
     {
       key: 'search',
@@ -159,37 +169,37 @@ export default function Dashboard5Page() {
       key: 'team_name',
       label: 'Team Name',
       type: 'select' as const,
-      options: filterOptions?.team_names.map((name) => ({
+      options: teamNames.map((name) => ({
         label: name,
         value: name,
-      })) || [],
+      })),
     },
     {
       key: 'type',
       label: 'Type',
       type: 'select' as const,
-      options: filterOptions?.types.map((type) => ({
+      options: types.map((type) => ({
         label: type,
         value: type,
-      })) || [],
+      })),
     },
     {
       key: 'uploaded_by',
       label: 'Uploaded By',
       type: 'select' as const,
-      options: filterOptions?.uploaded_by.map((user) => ({
+      options: uploadedBy.map((user) => ({
         label: user,
         value: user,
-      })) || [],
+      })),
     },
     {
       key: 'published_platform',
       label: 'Published Platform',
       type: 'select' as const,
-      options: filterOptions?.published_platforms.map((platform) => ({
+      options: platforms.map((platform) => ({
         label: platform,
         value: platform,
-      })) || [],
+      })),
     },
   ];
 
@@ -203,7 +213,7 @@ export default function Dashboard5Page() {
       </div>
 
       <FilterPanel
-        filters={filters}
+        filters={filters} 
         onFilterChange={handleFilterChange}
         config={filterConfig}
         loading={loadingOptions}
@@ -227,7 +237,10 @@ export default function Dashboard5Page() {
         <div className="bg-slate-900 rounded-xl p-6 shadow mb-8">
           <h2 className="text-xl font-semibold mb-4">Data Quality</h2>
           <p className="text-slate-400 mb-4">
-            Total records: <span className="font-medium text-white">{dataQuality.total_records}</span>
+            Total records:{' '}
+            <span className="font-medium text-white">
+              {dataQuality.total_records}
+            </span>
           </p>
 
           <div className="overflow-x-auto">

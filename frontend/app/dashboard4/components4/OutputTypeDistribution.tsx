@@ -12,9 +12,9 @@ export default function OutputTypeDistribution() {
 
   useEffect(() => {
   fetchOutputDistribution().then(res => {
-    setData(res.data)
+    setData(res || [])
   })
-}, [])
+  }, [])
 const enrichedData = data.map((item : any) => ({
   ...item,
   publish_rate:

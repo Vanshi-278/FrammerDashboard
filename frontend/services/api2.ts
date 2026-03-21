@@ -2,8 +2,9 @@ import axios from "axios";
 import { getApiUrl } from "../app/utils/apiConfig";
 
 const API = axios.create({
-  baseURL: getApiUrl() // Ensure this matches your working file exactly
-});
+  baseURL: "http://127.0.0.1:8000/api"
+})
+
 
 // -------------------------------
 // Trend Endpoints
